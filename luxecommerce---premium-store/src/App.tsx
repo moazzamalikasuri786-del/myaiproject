@@ -1,199 +1,153 @@
-import React, { useState, useEffect } from 'react';
-import { Navbar } from './components/Navbar';
-import { Hero } from './components/Hero';
-import { FeaturedProducts } from './components/FeaturedProducts';
-import { Categories } from './components/Categories';
-import { WhyChooseUs } from './components/WhyChooseUs';
-import { Testimonials } from './components/Testimonials';
-import { Footer } from './components/Footer';
-import { Toast } from './components/Toast';
-import { CartDrawer } from './components/CartDrawer';
-import { ProductDetails } from './components/ProductDetails';
-import { CustomCursor } from './components/CustomCursor';
-import { motion, useScroll, useSpring, AnimatePresence } from 'motion/react';
-import { Product } from './constants';
+import { useMemo } from 'react';
+import { motion } from 'motion/react';
+import { BookOpen, PlayCircle, Star, Users, WandSparkles, ShieldCheck, LayoutDashboard } from 'lucide-react';
 
-interface CartItem extends Product {
-  quantity: number;
-}
+const featuredCourses = [
+  {
+    title: 'Advanced React + Next.js 2026',
+    mentor: 'Ava Brooks',
+    students: '48.2k',
+    rating: 4.9,
+    duration: '22h',
+    level: 'Intermediate'
+  },
+  {
+    title: 'AI Product Engineering Bootcamp',
+    mentor: 'Noah Patel',
+    students: '31.7k',
+    rating: 4.8,
+    duration: '18h',
+    level: 'Beginner'
+  },
+  {
+    title: 'System Design Interview Mastery',
+    mentor: 'Mia Carter',
+    students: '66.4k',
+    rating: 4.9,
+    duration: '14h',
+    level: 'Advanced'
+  }
+];
+
+const features = [
+  {
+    icon: WandSparkles,
+    title: 'AI Learning Assistant',
+    description: 'Every lesson includes AI help for summaries, examples, and instant doubt solving.'
+  },
+  {
+    icon: LayoutDashboard,
+    title: 'Skill Roadmaps',
+    description: 'Structured paths turn random courses into a clear journey from zero to job-ready.'
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Verified Certificates',
+    description: 'Shareable certificates with verification links for recruiters and hiring teams.'
+  }
+];
 
 export default function App() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [toast, setToast] = useState<{ message: string; isVisible: boolean }>({
-    message: '',
-    isVisible: false,
-  });
-
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
-  });
-
-  const showToast = (message: string) => {
-    setToast({ message, isVisible: true });
-    setTimeout(() => {
-      setToast((prev) => ({ ...prev, isVisible: false }));
-    }, 3000);
-  };
-
-  const addToCart = (product: Product) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-    showToast(`${product.name} added to bag`);
-  };
-
-  const updateQuantity = (id: string, delta: number) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
-      )
-    );
-  };
-
-  const removeFromCart = (id: string) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  // Smooth scroll behavior
-  useEffect(() => {
-    document.documentElement.style.scrollBehavior = 'smooth';
-    return () => {
-      document.documentElement.style.scrollBehavior = 'auto';
-    };
-  }, []);
+  const stats = useMemo(
+    () => [
+      { label: 'Active learners', value: '1.2M+' },
+      { label: 'Expert instructors', value: '3,400+' },
+      { label: 'Courses & projects', value: '12,000+' }
+    ],
+    []
+  );
 
   return (
-    <div className="relative min-h-screen bg-primary selection:bg-accent selection:text-white">
-      {/* Awwwards Elements */}
-      <div className="grain-overlay" />
-      <CustomCursor />
-      
-      {/* Progress Bar */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-[2px] bg-accent z-[100] origin-left"
-        style={{ scaleX }}
-      />
+    <div className="min-h-screen bg-slate-950 text-white">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-slate-950/80 backdrop-blur">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2 text-xl font-bold">
+            <BookOpen className="text-cyan-400" />
+            LearnForge
+          </div>
+          <div className="hidden gap-8 md:flex text-sm text-slate-300">
+            <a href="#courses">Courses</a>
+            <a href="#features">Features</a>
+            <a href="#instructors">Instructors</a>
+          </div>
+          <button className="rounded-full bg-cyan-500 px-5 py-2 text-sm font-semibold text-slate-950">Start Learning</button>
+        </nav>
+      </header>
 
-      <Navbar 
-        cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)} 
-        onOpenCart={() => setIsCartOpen(true)} 
-        onViewDetails={(p) => setSelectedProduct(p)}
-      />
-      
-      <main className="relative">
-        <Hero />
-        
-        <div id="shop" className="relative z-10">
-          <FeaturedProducts 
-            onAddToCart={addToCart} 
-            onViewDetails={(p) => setSelectedProduct(p)}
-          />
-        </div>
-        
-        <Categories />
-        
-        <WhyChooseUs />
-        
-        <Testimonials />
-        
-        {/* Newsletter Section - Handcrafted Editorial Style */}
-        <section className="py-48 px-6 relative overflow-hidden">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-end">
-              <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                <h2 className="editorial-text text-white mb-12">
-                  JOIN THE <br />
-                  <span className="text-accent italic">LUXE</span> CIRCLE
-                </h2>
-                <p className="text-slate-400 text-2xl max-w-md leading-tight font-light">
-                  Stay ahead of the curve. Get exclusive access to drops, private sales, and the future of premium quality.
-                </p>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="relative"
-              >
-                <form 
-                  className="flex flex-col gap-8"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    showToast('Successfully subscribed to newsletter!');
-                  }}
-                >
-                  <div className="relative group">
-                    <input
-                      type="email"
-                      placeholder="YOUR EMAIL ADDRESS"
-                      required
-                      className="w-full bg-transparent border-b-2 border-white/10 py-8 text-3xl font-display uppercase focus:outline-none focus:border-accent transition-all placeholder:text-white/10"
-                    />
-                    <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-accent group-focus-within:w-full transition-all duration-700" />
-                  </div>
-                  
-                  <button
-                    type="submit"
-                    className="self-start group flex items-center gap-4 text-2xl font-black tracking-tighter hover:text-accent transition-colors"
-                  >
-                    SUBSCRIBE NOW
-                    <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-accent group-hover:bg-accent group-hover:text-white transition-all">
-                      →
-                    </div>
-                  </button>
-                </form>
-              </motion.div>
+      <main>
+        <section className="mx-auto grid max-w-7xl gap-12 px-6 py-20 md:grid-cols-2 md:py-28">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-500/40 px-4 py-2 text-sm text-cyan-300">
+              <WandSparkles size={16} /> Next-gen learning platform
+            </p>
+            <h1 className="mb-6 text-5xl font-black leading-tight md:text-6xl">
+              Build your <span className="text-cyan-400">future skills</span> with a modern Udemy-style academy
+            </h1>
+            <p className="mb-8 max-w-xl text-lg text-slate-300">
+              LearnForge combines premium video courses, AI tutoring, cohort challenges, and portfolio projects in one clean experience.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <button className="rounded-full bg-cyan-500 px-6 py-3 font-semibold text-slate-950">Explore Courses</button>
+              <button className="rounded-full border border-white/20 px-6 py-3 font-semibold text-white">Become an Instructor</button>
             </div>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl border border-white/10 bg-slate-900 p-6 shadow-2xl shadow-cyan-900/30">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-xl font-semibold">Live classroom</h3>
+              <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs text-emerald-300">Live now</span>
+            </div>
+            <div className="mb-6 rounded-2xl bg-slate-800 p-6">
+              <div className="mb-3 flex items-center gap-2 text-sm text-slate-300">
+                <PlayCircle className="text-cyan-400" size={18} />
+                Product Design Sprint: Capstone Review
+              </div>
+              <div className="h-40 rounded-xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20" />
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-center text-sm">
+              {stats.map((s) => (
+                <div key={s.label} className="rounded-xl border border-white/10 p-3">
+                  <div className="font-bold text-cyan-300">{s.value}</div>
+                  <div className="text-slate-400">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </section>
+
+        <section id="courses" className="mx-auto max-w-7xl px-6 py-16">
+          <h2 className="mb-8 text-3xl font-bold">Featured Courses</h2>
+          <div className="grid gap-5 md:grid-cols-3">
+            {featuredCourses.map((course) => (
+              <article key={course.title} className="rounded-2xl border border-white/10 bg-slate-900 p-5">
+                <p className="mb-3 text-sm text-cyan-300">{course.level} • {course.duration}</p>
+                <h3 className="mb-3 text-xl font-semibold">{course.title}</h3>
+                <p className="mb-4 text-sm text-slate-300">By {course.mentor}</p>
+                <div className="flex items-center justify-between text-sm text-slate-300">
+                  <span className="flex items-center gap-1"><Users size={15} /> {course.students}</span>
+                  <span className="flex items-center gap-1"><Star size={15} className="text-amber-300" /> {course.rating}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section id="features" className="mx-auto max-w-7xl px-6 py-16">
+          <h2 className="mb-8 text-3xl font-bold">Why this platform is different</h2>
+          <div className="grid gap-5 md:grid-cols-3">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <div key={feature.title} className="rounded-2xl border border-white/10 bg-slate-900 p-6">
+                  <Icon className="mb-4 text-cyan-400" />
+                  <h3 className="mb-2 text-xl font-semibold">{feature.title}</h3>
+                  <p className="text-slate-300">{feature.description}</p>
+                </div>
+              );
+            })}
           </div>
         </section>
       </main>
-
-      <Footer />
-
-      {/* Overlays */}
-      <CartDrawer 
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        items={cartItems}
-        onUpdateQuantity={updateQuantity}
-        onRemove={removeFromCart}
-        onCheckout={() => {
-          setIsCartOpen(false);
-          showToast('Checkout process initiated');
-        }}
-      />
-
-      <AnimatePresence>
-        {selectedProduct && (
-          <ProductDetails 
-            product={selectedProduct}
-            onClose={() => setSelectedProduct(null)}
-            onAddToCart={addToCart}
-          />
-        )}
-      </AnimatePresence>
-
-      <Toast 
-        message={toast.message} 
-        isVisible={toast.isVisible} 
-        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))} 
-      />
     </div>
   );
 }
